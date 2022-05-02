@@ -1,0 +1,1 @@
+"./L138_LCDK_aic3106_init.obj" "./L2p2-overdrive.obj" "./dsp_lab_utils.obj" "./vectors_intr.obj" "C:/Users/makcr/workspace_v11/lab1repo/lab2p2/sources/linker_dsp.cmd" -llibc.a -l"C:/Users/makcr/workspace_v11/lab1repo/DSP_BSL/lib/evmomapl138_bsl.lib" 
