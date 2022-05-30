@@ -71,7 +71,7 @@ int outSaturationStat = 0;
 /*---------------------------------------------------------------------------*/
 /* VARABLES DETECTOR DTMF asdsad */
 /*---------------------------------------------------------------------------*/
-/* Señales de salida para cada filtro */
+/* Seï¿½ales de salida para cada filtro */
 float dtmfTones[7];
 
 int32_t framePos = 0;
@@ -82,18 +82,18 @@ int32_t dtmfSymbol = 0;
 /*---------------------------------------------------------------------------*/
 /* VARABLES FILTRO NOTCH */
 /*---------------------------------------------------------------------------*/
-bqStatus_t tuneBsfState = { // Inicialmente para 500Hz y 100Hz de bw
-    -1.942499503811206,               // A1
-    0.980555318909952,                // A2
-    0.990277659454976,                // B0
-    -1.942499503811206,               // B1
-    0.990277659454976,                // B2
+bqStatus_t tuneBsfState = {
+    0,                // A1
+    0,                // A2
+    0,                // B0
+    0,                // B1
+    0,                // B2
     {0.0, 0.0, 0.0},
     {0.0, 0.0, 0.0}
 };
 
 float tuneBsfOutput = 0.0;
-float notchFreq     = 1000.0;
+float notchFreq     = 20.0;
 
 
 /******************************************************************************
@@ -117,20 +117,14 @@ interrupt void interrupt4(void) // interrupt service routine
         DLU_readCodecInputs(&floatCodecInputL, &floatCodecInputR);
 
         /*-------------------------------------------------------------------*/
-        /* Inicia medición de tiempo de ejecución */
+        /* Inicia mediciï¿½n de tiempo de ejecuciï¿½n */
         DLU_tic();
         /*-------------------------------------------------------------------*/
         /* FILTRO NOTCH SINTONIZABLE */
         /*-------------------------------------------------------------------*/
-
-        if ( DLU_readPushButton1() ) {
-            notchFreq = notchFreq - 0.0040;
-        }
-        if ( DLU_readPushButton2() ) {
-            notchFreq = notchFreq + 0.0040;
-        }
-
+        notchFreq = (float)DLU_readTrimmerCounter();
         notchUpdate(notchFreq);
+        tuneBsfOutput = filterBiquad( &tuneBsfState, floatCodecInputR);
 
         /*-------------------------------------------------------------------*/
         /* FILTROS PARA DTMF */
@@ -146,19 +140,19 @@ interrupt void interrupt4(void) // interrupt service routine
 //        dtmfDetection(dtmfTones);
 
         /*-------------------------------------------------------------------*/
-        /* PARA VISUALIZAR EN GRÁFICO */
+        /* PARA VISUALIZAR EN GRï¿½FICO */
         /*-------------------------------------------------------------------*/
         DLU_enableSynchronicSingleCaptureOnAllGraphBuff();
         DLU_appendGraphBuff1(floatCodecInputR);
-        DLU_appendGraphBuff2(filterBiquad(&tuneBsfState, floatCodecInputR));
+        DLU_appendGraphBuff2(tuneBsfOutput);
 
         /*-------------------------------------------------------------------*/
         /* ESCRITURA EN SALIDA DEL CODEC */
         /*-------------------------------------------------------------------*/
-        floatCodecOutputL = floatCodecInputR;
-        floatCodecOutputR = filterBiquad( &tuneBsfState, floatCodecInputR);
+        floatCodecOutputL = tuneBsfOutput;
+        floatCodecOutputR = tuneBsfOutput;
 
-        /* Medición de tiempo de ejecución */
+        /* Mediciï¿½n de tiempo de ejecuciï¿½n */
         DLU_toc();
 
         outSaturationStat = DLU_writeCodecOutputs(floatCodecOutputL,floatCodecOutputR);
@@ -169,29 +163,29 @@ interrupt void interrupt4(void) // interrupt service routine
 
 void main()
 {
-    /* Inicialización de Pulsadores User 1 y User 2 */
+    /* InicializaciÃ³n de Pulsadores User 1 y User 2 */
     DLU_initPushButtons();
-    /* Inicializa función de medición de tiempos de ejecución */
+    /* Inicializa funciÃ³n de mediciÃ³n de tiempos de ejecuciÃ³n */
     DLU_initTicToc();
     /* Inicializacion BSL y AIC31 Codec */
     L138_initialise_intr(CODEC_FS, CODEC_ADC_GAIN, CODEC_DAC_ATTEN, CODEC_INPUT_CFG);
-    /* Inicialización de LEDs */
+    /* InicializaciÃ³n de LEDs */
     DLU_initLeds();
-    /* Configuración de Trimmer ajustado con Pushbuttons */
-    DLU_configTrimmerCounter(0, 1000);
-    DLU_configTrimmerAutoIncrement(1000, 5);
+    /* ConfiguraciÃ³n de Trimmer ajustado con Pushbuttons */
+    DLU_configTrimmerCounter(440, 880);
+    DLU_configTrimmerAutoIncrement(200, 3);
 
-   /* Loop infinito a espera de interrupción del Codec */
+   /* Loop infinito a espera de interrupciÃ³n del Codec */
     while(1);
 }
 
 /******************************************************************************
-*   \brief  Esta función implementa una etapa de filtro biquad
+*   \brief  Esta funciï¿½n implementa una etapa de filtro biquad
 *
 *   \param filterNState     : puntero a la estructura del biquad a ejecutar
-*   \param filterInput      : señal de entrada al filtro biquad a ejecutar
+*   \param filterInput      : seï¿½al de entrada al filtro biquad a ejecutar
 *
-*   \return filterOutput    : señal de salida del filtro biquad ejecutado
+*   \return filterOutput    : seï¿½al de salida del filtro biquad ejecutado
 ******************************************************************************/
 float filterBiquad(bqStatus_t *filterNState, float filterInput){
     filterNState->bqInput[2] = filterNState->bqInput[1];
@@ -213,25 +207,28 @@ float filterBiquad(bqStatus_t *filterNState, float filterInput){
 }
 
 /******************************************************************************
-*   \brief Esta función modifica los parámetros del filtro notch para ajustar
-*           su frecuencia de sintonía. El ancho de banda en cambio se mantiene
+*   \brief Esta funciÃ³n modifica los parÃ¡metros del filtro notch para ajustar
+*           su frecuencia de sintonÃ­a. El ancho de banda en cambio se mantiene
 *           constante y dependiente de la constante TUNE_BSF_D.
 *
-*   \param tuneFreq :  es la frecuencia de sintonía deseada en Hz.
+*   \param tuneFreq :  es la frecuencia de sintonÃ­a deseada en Hz.
 *
 *   \return Void.
 ******************************************************************************/
 void notchUpdate(float tuneFreq){
     float d = 0.980555318909952;                                  // BW = 50Hz
     float theta = 2 * 3.141592653589793 * tuneFreq / 16000;       // frec s = 16kHz
-    tuneBsfState.bqA1 = (1+d)*cos(theta);
+    tuneBsfState.bqA1 = -(1+d)*cos(theta);
+    tuneBsfState.bqA2 = d;
+    tuneBsfState.bqB0 = (1+d)/2;
     tuneBsfState.bqB1 = -(1+d)*cos(theta);
+    tuneBsfState.bqB2 = (1+d)/2;
 }
 
 /******************************************************************************
-*   \brief Esta función permite detectar de forma sencilla la envolvente
+*   \brief Esta funciï¿½n permite detectar de forma sencilla la envolvente
 *           de los tonos filtrados.
-*           Una vez se retorna de la función quedan actualizados los valores
+*           Una vez se retorna de la funciï¿½n quedan actualizados los valores
 *           de la variable 'tonesAmplitud'.
 
 *   \param *tonesInputs : puntero a arreglo de canales filtrados
@@ -272,10 +269,10 @@ void envelopeDetector(float *tonesInputs) {
 }
 
 /******************************************************************************
-*   \brief Función que actualiza el estado de los leds para indicar símbolo
+*   \brief Funciï¿½n que actualiza el estado de los leds para indicar sï¿½mbolo
 *           detectado en base a reconocer DTFM.
-*           Al retornar de esta función, los led se actualizan con el último
-*           símbolo detectado.
+*           Al retornar de esta funciï¿½n, los led se actualizan con el ï¿½ltimo
+*           sï¿½mbolo detectado.
 
 *   \param *tonesInputs : puntero a arreglo de canales filtrados
 *
@@ -286,7 +283,7 @@ void dtmfDetection(float *tonesInputs) {
     int32_t dtmf_row = 0;
     int32_t dtmf_col = 0;
     /*-----------------------------------------------------------------------*/
-    /* Actualización de amplitudes */
+    /* Actualizaciï¿½n de amplitudes */
     envelopeDetector(tonesInputs);
 
     /* Promedio de canales */
@@ -298,31 +295,31 @@ void dtmfDetection(float *tonesInputs) {
             tonesAmplitud[5] +
             tonesAmplitud[6] );
     /*-----------------------------------------------------------------------*/
-    /* Detección de canal bajo */
+    /* Detecciï¿½n de canal bajo */
     do
     {
-        /* ¿Será fila 1? */
+        /* ï¿½Serï¿½ fila 1? */
         levelAux = tonesAmplitud[0] / (tonesAmplitud[1] + tonesAmplitud[2] +tonesAmplitud[3]);
         if (levelAux > DTMF_CH_SNR_RATE)
         {
             dtmf_row = 1;
             break;
         }
-        /* ¿Será fila 2? */
+        /* ï¿½Serï¿½ fila 2? */
         levelAux = tonesAmplitud[1] / (tonesAmplitud[0] + tonesAmplitud[2] +tonesAmplitud[3]);
         if (levelAux > DTMF_CH_SNR_RATE)
         {
             dtmf_row = 2;
             break;
         }
-        /* ¿Será fila 3? */
+        /* ï¿½Serï¿½ fila 3? */
         levelAux = tonesAmplitud[2] / (tonesAmplitud[1] + tonesAmplitud[0] +tonesAmplitud[3]);
         if (levelAux > DTMF_CH_SNR_RATE)
         {
             dtmf_row = 3;
             break;
         }
-        /* ¿Será fila 4? */
+        /* ï¿½Serï¿½ fila 4? */
         levelAux = tonesAmplitud[3] / (tonesAmplitud[1] + tonesAmplitud[2] +tonesAmplitud[0]);
         if (levelAux > DTMF_CH_SNR_RATE)
         {
@@ -333,24 +330,24 @@ void dtmfDetection(float *tonesInputs) {
     } while(0);
 
     /*-----------------------------------------------------------------------*/
-    /* Detección de canal alto */
+    /* Detecciï¿½n de canal alto */
     do
     {
-        /* ¿Será columna 1? */
+        /* ï¿½Serï¿½ columna 1? */
         levelAux = tonesAmplitud[4] / (tonesAmplitud[5] + tonesAmplitud[6]);
         if (levelAux > DTMF_CH_SNR_RATE)
         {
             dtmf_col = 1;
             break;
         }
-        /* ¿Será columna 2? */
+        /* ï¿½Serï¿½ columna 2? */
         levelAux = tonesAmplitud[5] / (tonesAmplitud[4] + tonesAmplitud[6]);
         if (levelAux > DTMF_CH_SNR_RATE)
         {
             dtmf_col = 2;
             break;
         }
-        /* ¿Será columna 3? */
+        /* ï¿½Serï¿½ columna 3? */
         levelAux = tonesAmplitud[6] / (tonesAmplitud[4] + tonesAmplitud[5]);
         if (levelAux > DTMF_CH_SNR_RATE)
         {
@@ -361,92 +358,92 @@ void dtmfDetection(float *tonesInputs) {
     } while(0);
 
     /*-----------------------------------------------------------------------*/
-    /* Decodificación de número de símbolo */
+    /* Decodificaciï¿½n de nï¿½mero de sï¿½mbolo */
     if ( ( dtmf_row >= 1 ) && (dtmf_col >= 1) )
         dtmfSymbol = dtmf_col + 3*(dtmf_row - 1);
     else
         dtmfSymbol = 0;
 
     /*-----------------------------------------------------------------------*/
-    /* Actualización de LEDs */
-    if ( dtmfSymbol == 1) // Símbolo: 1
+    /* Actualizaciï¿½n de LEDs */
+    if ( dtmfSymbol == 1) // Sï¿½mbolo: 1
     {
                     DLU_writeLedD4(LED_OFF);
                     DLU_writeLedD5(LED_OFF);
                     DLU_writeLedD6(LED_OFF);
                     DLU_writeLedD7(LED_ON);
     }
-    else if ( dtmfSymbol == 2) // Símbolo: 2
+    else if ( dtmfSymbol == 2) // Sï¿½mbolo: 2
     {
                     DLU_writeLedD4(LED_OFF);
                     DLU_writeLedD5(LED_OFF);
                     DLU_writeLedD6(LED_ON);
                     DLU_writeLedD7(LED_OFF);
     }
-    else if ( dtmfSymbol == 3) // Símbolo: 3
+    else if ( dtmfSymbol == 3) // Sï¿½mbolo: 3
     {
                     DLU_writeLedD4(LED_OFF);
                     DLU_writeLedD5(LED_OFF);
                     DLU_writeLedD6(LED_ON);
                     DLU_writeLedD7(LED_ON);
     }
-    else if ( dtmfSymbol == 4) // Símbolo: 4
+    else if ( dtmfSymbol == 4) // Sï¿½mbolo: 4
     {
                     DLU_writeLedD4(LED_OFF);
                     DLU_writeLedD5(LED_ON);
                     DLU_writeLedD6(LED_OFF);
                     DLU_writeLedD7(LED_OFF);
     }
-    else if ( dtmfSymbol == 5) // Símbolo: 5
+    else if ( dtmfSymbol == 5) // Sï¿½mbolo: 5
     {
                     DLU_writeLedD4(LED_OFF);
                     DLU_writeLedD5(LED_ON);
                     DLU_writeLedD6(LED_OFF);
                     DLU_writeLedD7(LED_ON);
     }
-    else if ( dtmfSymbol == 6) // Símbolo: 6
+    else if ( dtmfSymbol == 6) // Sï¿½mbolo: 6
     {
                     DLU_writeLedD4(LED_OFF);
                     DLU_writeLedD5(LED_ON);
                     DLU_writeLedD6(LED_ON);
                     DLU_writeLedD7(LED_OFF);
     }
-    else if ( dtmfSymbol == 7) // Símbolo: 7
+    else if ( dtmfSymbol == 7) // Sï¿½mbolo: 7
     {
                     DLU_writeLedD4(LED_OFF);
                     DLU_writeLedD5(LED_ON);
                     DLU_writeLedD6(LED_ON);
                     DLU_writeLedD7(LED_ON);
     }
-    else if ( dtmfSymbol == 8) // Símbolo: 8
+    else if ( dtmfSymbol == 8) // Sï¿½mbolo: 8
     {
                     DLU_writeLedD4(LED_ON);
                     DLU_writeLedD5(LED_OFF);
                     DLU_writeLedD6(LED_OFF);
                     DLU_writeLedD7(LED_OFF);
     }
-    else if ( dtmfSymbol == 9) // Símbolo: 9
+    else if ( dtmfSymbol == 9) // Sï¿½mbolo: 9
     {
                     DLU_writeLedD4(LED_ON);
                     DLU_writeLedD5(LED_OFF);
                     DLU_writeLedD6(LED_OFF);
                     DLU_writeLedD7(LED_ON);
     }
-    else if ( dtmfSymbol == 10) // Símbolo: *
+    else if ( dtmfSymbol == 10) // Sï¿½mbolo: *
     {
                     DLU_writeLedD4(LED_ON);
                     DLU_writeLedD5(LED_ON);
                     DLU_writeLedD6(LED_OFF);
                     DLU_writeLedD7(LED_OFF);
     }
-    else if ( dtmfSymbol == 11) // Símbolo: 0
+    else if ( dtmfSymbol == 11) // Sï¿½mbolo: 0
     {
                     DLU_writeLedD4(LED_OFF);
                     DLU_writeLedD5(LED_OFF);
                     DLU_writeLedD6(LED_OFF);
                     DLU_writeLedD7(LED_OFF);
     }
-    else if ( dtmfSymbol == 12) // Símbolo: #
+    else if ( dtmfSymbol == 12) // Sï¿½mbolo: #
     {
                     DLU_writeLedD4(LED_ON);
                     DLU_writeLedD5(LED_ON);

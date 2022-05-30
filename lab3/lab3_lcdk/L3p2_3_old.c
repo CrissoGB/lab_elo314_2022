@@ -69,7 +69,7 @@ int outSaturationStat = 0;
 //#pragma DATA_SECTION(audioBufferL,".EXT_RAM")
 
 /*---------------------------------------------------------------------------*/
-/* VARABLES DETECTOR DTMF */
+/* VARABLES DETECTOR DTMF asdsad */
 /*---------------------------------------------------------------------------*/
 /* Se�ales de salida para cada filtro */
 float dtmfTones[7];
@@ -83,11 +83,82 @@ int32_t dtmfSymbol = 0;
 /* VARABLES FILTRO NOTCH */
 /*---------------------------------------------------------------------------*/
 bqStatus_t tuneBsfState = { // Inicialmente para 500Hz y 100Hz de bw
-    -1.923792135508659,               // A1
+    -1.942499503811206,               // A1
+    0.980555318909952,                // A2
+    0.990277659454976,                // B0
+    -1.942499503811206,               // B1
+    0.990277659454976,                // B2
+    {0.0, 0.0, 0.0},
+    {0.0, 0.0, 0.0}
+};
+
+
+bqStatus_t BPF0 = { // 697 Hz
+    -1.895767606089256,               // A1
+    0.969067417193795,                // A2
+    0.01546629140310257,              // B0
+    0,               // B1
+    -0.01546629140310257,                // B2
+    {0.0, 0.0, 0.0},
+    {0.0, 0.0, 0.0}
+};
+
+bqStatus_t BPF1 = { // 770 Hz
+    -1.879732707662667,               // A1
+    0.969067417193795,                // A2
+    0.01546629140310257,                // B0
+    0,               // B1
+    -0.01546629140310257,                // B2
+    {0.0, 0.0, 0.0},
+    {0.0, 0.0, 0.0}
+};
+
+bqStatus_t BPF2 = { // 852 Hz
+    -1.859879547221657,               // A1
+    0.969067417193795,                // A2
+    0.01546629140310257,                // B0
+    0,               // B1
+    -0.01546629140310257,                // B2
+    {0.0, 0.0, 0.0},
+    {0.0, 0.0, 0.0}
+};
+
+bqStatus_t BPF3 = { // 941 Hz
+    -1.836149973561146,               // A1
+    0.969067417193795,                // A2
+    0.01546629140310257,                // B0
+    0,               // B1
+    -0.01546629140310257,                // B2
+    {0.0, 0.0, 0.0},
+    {0.0, 0.0, 0.0}
+};
+
+bqStatus_t BPF4 = { // 1209 Hz
+    -1.744534596215547,               // A1
     0.961481451595328,                // A2
-    0.980740725797664,                // B0
-    -1.923792135508659,               // B1
-    0.980740725797664,                // B2
+    0.01925927420233614,                // B0
+    0,               // B1
+    -0.01925927420233614,                // B2
+    {0.0, 0.0, 0.0},
+    {0.0, 0.0, 0.0}
+};
+
+bqStatus_t BPF5 = { // 1336 Hz
+    -1.697664805622379,               // A1
+    0.961481451595328,                // A2
+    0.01925927420233614,                // B0
+    0,               // B1
+    -0.01925927420233614,                // B2
+    {0.0, 0.0, 0.0},
+    {0.0, 0.0, 0.0}
+};
+
+bqStatus_t BPF6 = { // 1447 Hz
+    -1.640688189104886,               // A1
+    0.961481451595328,                // A2
+    0.01925927420233614,                // B0
+    0,               // B1
+    -0.01925927420233614,                // B2
     {0.0, 0.0, 0.0},
     {0.0, 0.0, 0.0}
 };
@@ -122,33 +193,33 @@ interrupt void interrupt4(void) // interrupt service routine
         /*-------------------------------------------------------------------*/
         /* FILTRO NOTCH SINTONIZABLE */
         /*-------------------------------------------------------------------*/
-        tuneBsfOutput = filterBiquad( &tuneBsfState, floatCodecInputR);
+        tuneBsfOutput = 0.0;
 
         /*-------------------------------------------------------------------*/
         /* FILTROS PARA DTMF */
         /*-------------------------------------------------------------------*/
-//        dtmfTones[0] = 0.0;
-//        dtmfTones[1] = 0.0;
-//        dtmfTones[2] = 0.0;
-//        dtmfTones[3] = 0.0;
-//        dtmfTones[4] = 0.0;
-//        dtmfTones[5] = 0.0;
-//        dtmfTones[6] = 0.0;
-//
-//        dtmfDetection(dtmfTones);
+        dtmfTones[0] = filterBiquad(&BPF0, floatCodecInputR);
+        dtmfTones[1] = filterBiquad(&BPF1, floatCodecInputR);
+        dtmfTones[2] = filterBiquad(&BPF2, floatCodecInputR);
+        dtmfTones[3] = filterBiquad(&BPF3, floatCodecInputR);
+        dtmfTones[4] = filterBiquad(&BPF4, floatCodecInputR);
+        dtmfTones[5] = filterBiquad(&BPF5, floatCodecInputR);
+        dtmfTones[6] = filterBiquad(&BPF6, floatCodecInputR);
+
+        dtmfDetection(dtmfTones);
 
         /*-------------------------------------------------------------------*/
         /* PARA VISUALIZAR EN GR�FICO */
         /*-------------------------------------------------------------------*/
         DLU_enableSynchronicSingleCaptureOnAllGraphBuff();
         DLU_appendGraphBuff1(floatCodecInputR);
-        DLU_appendGraphBuff2(tuneBsfOutput);
+        DLU_appendGraphBuff2(filterBiquad(&tuneBsfState, floatCodecInputR));
 
         /*-------------------------------------------------------------------*/
         /* ESCRITURA EN SALIDA DEL CODEC */
         /*-------------------------------------------------------------------*/
-        floatCodecOutputL = floatCodecInputR
-        floatCodecOutputR = tuneBsfOutput;
+        floatCodecOutputL = floatCodecInputR;
+        floatCodecOutputR = filterBiquad( &tuneBsfState, floatCodecInputR);
 
         /* Medici�n de tiempo de ejecuci�n */
         DLU_toc();
@@ -214,7 +285,16 @@ float filterBiquad(bqStatus_t *filterNState, float filterInput){
 *   \return Void.
 ******************************************************************************/
 void notchUpdate(float tuneFreq){
-    // COMPLETAR
+    if ( DLU_readPushButton1() ) {
+        tuneFreq = tuneFreq - 20;
+    }
+    if ( DLU_readPushButton2() ) {
+        tuneFreq = tuneFreq + 20;
+    }
+    float d = 0.980555318909952;
+    float theta = 2*3.141592653589793*tuneFreq/16000;       // frec s = 16kHz
+    //*tuneBsfState->bqA1 = (1+d)*cos(theta);
+    //*tuneBsfState->bqB1 = -(1+d)*cos(theta);
 }
 
 /******************************************************************************
