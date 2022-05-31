@@ -139,13 +139,15 @@ z2 = fftshift(fft(filtered_pcm));
 %y_pcm = H2(w_arr, 0.99);
 %y_fpcm =  H2(w_arr, 0.99);
 figure()
-plot(w_arr, abs(z))
-axis([-pi pi -20 330]); xlabel('w (rad/s)'); ylabel('magnitud (dB)');
-title('Magnitud de respuesta en frecuencia para distintos \theta')
+plot(w_arr, (20*log10(abs(z))))
+axis([-pi pi -20 70]); xlabel('w (rad/muestra)'); ylabel('magnitud (dB)');
+title('Magnitud del espectro de la señal de entrada pcm')
 figure()
-plot(w_arr, abs(z2))
-axis([-pi pi -20 330]); xlabel('w (rad/s)'); ylabel('magnitud (dB)');
-title('Magnitud de respuesta en frecuencia para distintos \theta')
+plot(w_arr, (20*log10(abs(z2))))
+axis([-pi pi -20 70]); xlabel('w (rad/muestra)'); ylabel('magnitud (dB)');
+title('Magnitud del espectro de la señal de salida del filtro IIR diseñado')
+
+
 
 
 %% II.1
