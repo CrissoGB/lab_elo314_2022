@@ -97,16 +97,16 @@ w_arr0 = -pi:2*pi/length(nspeech):pi-2*pi/length(nspeech);
 y = FIR_filter(nspeech,fn);
 w_arr1 = -pi:2*pi/length(y):pi-2*pi/length(y);
 
-r = 0.99;
+r = 1;
 theta = 2*pi*fn;
 %parámetros
 b0 = 1;
-b1 = -r*cos(theta);
+b1 = -2*r*cos(theta);
 b2 = r^2;  
 B = [b0 b1 b2];
 A = 1;
 
-yfi=filter(A, B, nspeech); %FORMA DIRECTA 2 TRANSPUESTA
+yfi=filter(B, A, nspeech); %FORMA DIRECTA 2 TRANSPUESTA
 figure()
 plot(w_arr0, (20*log10(abs(fftshift(fft(nspeech))))));
 axis([-pi pi -30 75]); xlabel('w (rad/muestra)'); ylabel('magnitud (dB)');
@@ -123,8 +123,9 @@ title('Magnitud del espectro de la señal de salida empleando filter()')
 %legend('nspeech','filter','FIR filter')A
 %%  FILTRADO IIR DE LA SEÑAL PCM
 load("pcm.mat")
+r=0.99;
 b_k = [1 -r];
-a1 = -r*cos(theta);
+a1 = -2*r*cos(theta);
 a2 = r^2;
 a_k = [a1 a2];
 
@@ -487,7 +488,7 @@ end
 
 % Filtro FIR por convolución 
 function y = FIR_filter(x,fn) % r = 1 theta = 2*pi*fn
-    r = 0.9;
+    r = 1;
     theta = 2*pi*fn;
     %parámetros
     b0 = 1;
