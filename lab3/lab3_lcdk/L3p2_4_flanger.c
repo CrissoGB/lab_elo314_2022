@@ -89,85 +89,6 @@ int32_t dtmfSymbol = 0;
 /*---------------------------------------------------------------------------*/
 /* VARABLES FILTRO NOTCH */
 /*---------------------------------------------------------------------------*/
-bqStatus_t tuneBsfState = { // Inicialmente para 500Hz y 100Hz de bw
--1.942499503811206,                // CALCULAR PARÁMETRO
-0.980555318909952,                // CALCULAR PARÁMETRO
-0.990277659454976,                // CALCULAR PARÁMETRO
--1.942499503811206,                // CALCULAR PARÁMETRO
-0.990277659454976,                // CALCULAR PARÁMETRO
-{0.0, 0.0, 0.0},
-{0.0, 0.0, 0.0}
-};
-
-bqStatus_t BPF0 = { // 697 Hz
-    -1.921775301617533,               // A1
-    0.996080699674483,                // A2
-    0.001959650162758286,              // B0
-    0,               // B1
-    -0.001959650162758286,                // B2
-    {0.0, 0.0, 0.0},
-    {0.0, 0.0, 0.0}
-};
-
-bqStatus_t BPF1 = { // 770 Hz
-    -1.905520423297435,               // A1
-    0.996080699674483,                // A2
-    0.001959650162758286,                // B0
-    0,               // B1
-    -0.001959650162758286,                // B2
-    {0.0, 0.0, 0.0},
-    {0.0, 0.0, 0.0}
-};
-
-bqStatus_t BPF2 = { // 852 Hz
-    -1.885394900911657,               // A1
-    0.996080699674483,                // A2
-    0.001959650162758286,                // B0
-    0,               // B1
-    -0.001959650162758286,                // B2
-    {0.0, 0.0, 0.0},
-    {0.0, 0.0, 0.0}
-};
-
-bqStatus_t BPF3 = { // 941 Hz
-    -1.861339785489172,               // A1
-    0.996080699674483,                // A2
-    0.001959650162758286,                // B0
-    0,               // B1
-    -0.001959650162758286,                // B2
-    {0.0, 0.0, 0.0},
-    {0.0, 0.0, 0.0}
-};
-
-bqStatus_t BPF4 = { // 1209 Hz
-    -1.775307043861197,               // A1
-    0.996080699674483,                // A2
-    0.001959650162758286,                // B0
-    0,               // B1
-    -0.001959650162758286,                // B2
-    {0.0, 0.0, 0.0},
-    {0.0, 0.0, 0.0}
-};
-
-bqStatus_t BPF5 = { // 1336 Hz
-    -1.727610500860642,               // A1
-    0.996080699674483,                // A2
-    0.001959650162758286,                // B0
-    0,               // B1
-    -0.001959650162758286,                // B2
-    {0.0, 0.0, 0.0},
-    {0.0, 0.0, 0.0}
-};
-
-bqStatus_t BPF6 = { // 1447 Hz
-    -1.669628854146205,               // A1
-    0.996080699674483,                // A2
-    0.001959650162758286,                // B0
-    0,               // B1
-    -0.001959650162758286,                // B2
-    {0.0, 0.0, 0.0},
-    {0.0, 0.0, 0.0}
-};
 
 float tuneBsfOutput = 0.0;
 float notchFreq     = 20.0;
@@ -209,21 +130,10 @@ interrupt void interrupt4(void) // interrupt service routine
         /*-------------------------------------------------------------------*/
         /* FILTRO NOTCH SINTONIZABLE */
         /*-------------------------------------------------------------------*/
-        notchFreq = (float)DLU_readTrimmerCounter();
-        notchUpdate(notchFreq);
-        tuneBsfOutput = filterBiquad( &tuneBsfState, floatCodecInputR);
 
         /*-------------------------------------------------------------------*/
         /* FILTROS PARA DTMF */
         /*-------------------------------------------------------------------*/
-//        dtmfTones[0] = filterBiquad(&BPF0, floatCodecInputR);
-//        dtmfTones[1] = filterBiquad(&BPF1, floatCodecInputR);
-//        dtmfTones[2] = filterBiquad(&BPF2, floatCodecInputR);
-//        dtmfTones[3] = filterBiquad(&BPF3, floatCodecInputR);
-//        dtmfTones[4] = filterBiquad(&BPF4, floatCodecInputR);
-//        dtmfTones[5] = filterBiquad(&BPF5, floatCodecInputR);
-//        dtmfTones[6] = filterBiquad(&BPF6, floatCodecInputR);
-
 //        dtmfDetection(dtmfTones);
 
         /*-------------------------------------------------------------------*/
@@ -241,7 +151,7 @@ interrupt void interrupt4(void) // interrupt service routine
             // retardo variable:
         gM = (int16_t)( M0 * (1 + gSweep * cos(gTheta)) );
 
-        // buffer circular
+        // buffer circular (experiencia 2)
         idxAudioBufferRRead = (idxAudioBufferRHead + AUDIOBUFFERSIZE - gM ) % AUDIOBUFFERSIZE;
         float valor_final_c = audioBufferL[idxAudioBufferRRead];
 
@@ -329,13 +239,7 @@ float filterBiquad(bqStatus_t *filterNState, float filterInput){
 *   \return Void.
 ******************************************************************************/
 void notchUpdate(float tuneFreq){
-    float d = 0.980555318909952;                                  // BW = 50Hz
-    float theta = 2 * 3.141592653589793 * tuneFreq / 16000;       // frec s = 16kHz
-    tuneBsfState.bqA1 = -(1+d)*cos(theta);
-    tuneBsfState.bqA2 = d;
-    tuneBsfState.bqB0 = (1+d)/2;
-    tuneBsfState.bqB1 = -(1+d)*cos(theta);
-    tuneBsfState.bqB2 = (1+d)/2;
+    // completar
 }
 
 /******************************************************************************
