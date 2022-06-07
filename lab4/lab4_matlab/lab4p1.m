@@ -5,8 +5,10 @@ f=100;
 w=2*pi*f;
 fs=5000;
 t = 0:1/fs:0.1-1/fs;
+
 x1=sin(w*t);
 x2=cos(w*t);
+
 %señales x1(t) x2(t)
 figure()
 subplot(2,1,1)
@@ -262,12 +264,24 @@ axis([0 1001 -60 10])
 
 %% IV.1)
 
-N = 200;
-n = 1:N;
-x=cos(2*pi*n/N)-sqrt(-1)*sin(2*pi*n/N);
+N = 8;
+n = 0:N-1;
+
+% x = e^2pin/n
+x=cos(2*pi*n/N)-1i*sin(2*pi*n/N);
+
+% x = delta()
+%x = zeros(8,1);
+%x(1)=1;
+
+% x = 1
+%x = ones(8,1);
+
+% x = cos(2pin/N)
+%x = cos(2*pi*n/N);
 t=0:0.5/N:0.5-0.5/N;
 figure()
-plot(t,x)
+stem(t,x)
 X = DFTsum(x);
 w = 0:2*pi/N:2*pi-2*pi/N;
 figure()
@@ -275,15 +289,55 @@ stem(w,abs(X))
 X2 = fft(x);
 figure()
 stem(w,abs(X2))
+%% IV.2)
+
+%% IV.3)
+x1=cos(2*pi*100*t);
+fs = 5000;
+t = 0:1/fs:1-1/fs;
+X1 = DFTsum(x1);
+w = -pi:2*pi/5000:pi-2*pi/5000;
+figure()
+stem(w,abs(X1));
+
+X3 = fft(x1,500);
+w3 = -pi:2*pi/500:pi-2*pi/500;
+stem(w3,abs(X3));
+
+%% V.1)
+N = 8;
+t=0:0.5/N:0.5-0.5/N;
+xe = cos(2*pi*100*t);
+Xe = DFTmatrix(xe);
+w = -pi:2*pi/N:pi-2*pi/N;
+figure()
+stem(w,abs(Xe))
+
+
 %%
+function A = genAmatrix(N)
+    A = zeros(N);
+    for k=1:N
+        for n=1:N
+            A(k,n)=exp(-1i*2*pi*(k-1)*(n-1)/N);
+        end
+    end
+end
+
+function X = DFTmatrix(x)
+    A = genAmatrix(8);
+    X = A*x';
+
+end
+
 function X = DFTsum(x)
-    N = 200;
+    N = 5000;
     X = zeros(size(N));
     for k=1:N
         XK = 0;
         for n=1:N
-            theta = 2*pi*k*n/N;
-            XK= XK + x(n)*(cos(theta)-sqrt(-1)*sin(theta));
+            theta = 2*pi*(k-1)*(n-1)/N;
+            XK= XK + x(n)*(cos(theta)-1i*sin(theta));
         end
         X(k) = XK;
 
