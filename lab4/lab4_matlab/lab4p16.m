@@ -11,14 +11,197 @@ for nn=n
 end
 x4 = cos(2*pi*n/N);
 
-xx = x4;
+%%
 
-TEST = fft_stage(xx);
 
-subplot(2,1,1)
-plot(n,abs(TEST),'o-')
-subplot(2,1,2)
-plot(n,abs(fft(xx)),'o-')
+X1 = DFTdc(x1);
+
+f = @() DFTdc(x1);
+t11= timeit(f);
+f= @() fft(x1);
+t12= timeit(f);
+
+X2 = DFTdc(x2);
+
+f = @() DFTdc(x2);
+t21= timeit(f);
+f= @() fft(x2);
+t22= timeit(f);
+
+X3 = DFTdc(x3);
+f = @() DFTdc(x3);
+t31= timeit(f);
+f= @() fft(x3);
+t32= timeit(f);
+
+X4 = DFTdc(x4);
+f = @() DFTdc(x4);
+t41= timeit(f);
+f= @() fft(x4);
+t42= timeit(f);
+
+subplot(4,2,1)
+stem(n,abs(X1))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de DFTdc() para x_1")
+subplot(4,2,2)
+stem(n,abs(fft(x1)))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fft() para x_1")
+subplot(4,2,3)
+stem(n,abs(X2))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de DFTdc() para x_2")
+subplot(4,2,4)
+stem(n,abs(fft(x2)))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fft() para x_2")
+
+subplot(4,2,5)
+stem(n,abs(X3))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de DFTdc() para x_3")
+subplot(4,2,6)
+stem(n,abs(fft(x3)))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fft() para x_3")
+
+subplot(4,2,7)
+stem(n,abs(X4))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de DFTdc() para x_4")
+subplot(4,2,8)
+stem(n,abs(fft(x4)))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fft() para x_4")
+
+
+%%
+
+
+X1 = FFT8(x1);
+
+f = @() FFT8(x1);
+t11= timeit(f);
+f= @() fft(x1);
+t12= timeit(f);
+
+X2 = FFT8(x2);
+
+f = @() FFT8(x2);
+t21= timeit(f);
+f= @() fft(x2);
+t22= timeit(f);
+
+X3 = FFT8(x3);
+f = @() FFT8(x3);
+t31= timeit(f);
+f= @() fft(x3);
+t32= timeit(f);
+
+X4 = FFT8(x4);
+f = @() FFT8(x4);
+t41= timeit(f);
+f= @() fft(x4);
+t42= timeit(f);
+
+subplot(4,2,1)
+stem(n,abs(X1))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de FFT8() para x_1")
+subplot(4,2,2)
+stem(n,abs(fft(x1)))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fft() para x_1")
+subplot(4,2,3)
+stem(n,abs(X2))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de FFT8() para x_2")
+subplot(4,2,4)
+stem(n,abs(fft(x2)))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fft() para x_2")
+
+subplot(4,2,5)
+stem(n,abs(X3))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de FFT8() para x_3")
+subplot(4,2,6)
+stem(n,abs(fft(x3)))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fft() para x_3")
+
+subplot(4,2,7)
+stem(n,abs(X4))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de FFT8() para x_4")
+subplot(4,2,8)
+stem(n,abs(fft(x4)))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fft() para x_4")
+
+%%
+
+X1 = fft_stage(x1);
+
+f = @() fft_stage(x1);
+t11= timeit(f);
+f= @() fft(x1);
+t12= timeit(f);
+
+X2 = fft_stage(x2);
+
+f = @() fft_stage(x2);
+t21= timeit(f);
+f= @() fft(x2);
+t22= timeit(f);
+
+X3 = fft_stage(x3);
+f = @() fft_stage(x3);
+t31= timeit(f);
+f= @() fft(x3);
+t32= timeit(f);
+
+X4 = fft_stage(x4);
+f = @() fft_stage(x4);
+t41= timeit(f);
+f= @() fft(x4);
+t42= timeit(f);
+
+subplot(4,2,1)
+stem(n,abs(X1))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fftstage() para x_1")
+subplot(4,2,2)
+stem(n,abs(fft(x1)))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fft() para x_1")
+subplot(4,2,3)
+stem(n,abs(X2))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fftstage() para x_2")
+subplot(4,2,4)
+stem(n,abs(fft(x2)))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fft() para x_2")
+
+subplot(4,2,5)
+stem(n,abs(X3))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fftstage() para x_3")
+subplot(4,2,6)
+stem(n,abs(fft(x3)))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fft() para x_3")
+
+subplot(4,2,7)
+stem(n,abs(X4))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fftstage() para x_4")
+subplot(4,2,8)
+stem(n,abs(fft(x4)))
+xlabel("frecuencia normalizada (rad/muestra)"); ylabel("magnitud")
+title("DFT mediante uso de fft() para x_4")
 
 
 %%
