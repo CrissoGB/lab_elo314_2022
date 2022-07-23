@@ -118,6 +118,7 @@ xlabel('Frecuencia Hz')
 ylabel('Magnitud dB')
 title('Magnitud del espectro de la señal sintetizada para la vocal "a"')
 
+audiowrite("matlab_vowel_a.wav",y_a,fs)
 %sound(y_a,fs)
 %pause(2);
 
@@ -131,6 +132,7 @@ xlabel('Frecuencia Hz')
 ylabel('Magnitud dB')
 title('Magnitud del espectro de la señal sintetizada para la vocal "e"')
 
+audiowrite("matlab_vowel_e.wav",y_e,fs)
 %sound(y_e,fs)
 %pause(2);
 
@@ -144,6 +146,7 @@ xlabel('Frecuencia Hz')
 ylabel('Magnitud dB')
 title('Magnitud del espectro de la señal sintetizada para la vocal "i"')
 
+audiowrite("matlab_vowel_i.wav",y_i,fs)
 %sound(y_i,fs)
 %pause(2);
 
@@ -157,6 +160,7 @@ xlabel('Frecuencia Hz')
 ylabel('Magnitud dB')
 title('Magnitud del espectro de la señal sintetizada para la vocal "o"')
 
+audiowrite("matlab_vowel_o.wav",y_o,fs)
 %sound(y_o,fs)
 %pause(2);
 
@@ -170,22 +174,154 @@ xlabel('Frecuencia Hz')
 ylabel('Magnitud dB')
 title('Magnitud del espectro de la señal sintetizada para la vocal "u"')
 
-%sound(y_u,fs)
+audiowrite("matlab_vowel_u.wav",y_u,fs)
+sound(y_u,fs)
 %pause(2);
 
 %% I.4) myLPC
-x_in = vowel_a; % input
+
 P = 15; % filter order 
-a = mylpc(x_in,P);
+a2 = mylpc(vowel_a,P);
+e2 = mylpc(vowel_e,P);
+i2 = mylpc(vowel_i,P);
+o2 = mylpc(vowel_o,P);
+u2 = mylpc(vowel_u,P);
+
 w=-fs/2:fs/2-1;
 b = 1;
-y_a = filter(b,a,X);
-soundsc(y_a,fs)
-%%
-Ya = fft(y_a);
-figure()
-plot(w,mag2db(abs(fftshift(Ya))))
 
+est_a = filter(b,a2,vowel_a);
+est_e = filter(b,e2,vowel_e);
+est_i = filter(b,i2,vowel_i);
+est_o = filter(b,o2,vowel_o);
+est_u = filter(b,u2,vowel_u);
+
+
+
+Fa = fft(est_a,fs);
+figure()
+plot(w,mag2db(abs(fftshift(Fa))));
+xlim([0 fs/2])
+grid
+xlabel('Frecuencia Hz')
+ylabel('Magnitud dB')
+title('Magnitud del filtro AR modulador del tracto vocal para la vocal "a"')
+
+Fe = fft(est_e,fs);
+figure()
+plot(w,mag2db(abs(fftshift(Fe))));
+xlim([0 fs/2])
+grid
+xlabel('Frecuencia Hz')
+ylabel('Magnitud dB')
+title('Magnitud del filtro AR modulador del tracto vocal para la vocal "e"')
+
+Fi = fft(est_i,fs);
+figure()
+plot(w,mag2db(abs(fftshift(Fi))));
+xlim([0 fs/2])
+grid
+xlabel('Frecuencia Hz')
+ylabel('Magnitud dB')
+title('Magnitud del filtro AR modulador del tracto vocal para la vocal "i"')
+
+Fo = fft(est_o,fs);
+figure()
+plot(w,mag2db(abs(fftshift(Fo))));
+xlim([0 fs/2])
+grid
+xlabel('Frecuencia Hz')
+ylabel('Magnitud dB')
+title('Magnitud del filtro AR modulador del tracto vocal para la vocal "o"')
+
+Fu = fft(est_u,fs);
+figure()
+plot(w,mag2db(abs(fftshift(Fu))));
+xlim([0 fs/2])
+grid
+xlabel('Frecuencia Hz')
+ylabel('Magnitud dB')
+title('Magnitud del filtro AR modulador del tracto vocal para la vocal "u"')
+%% 
+%calculo de error entre coeficientes obtenidos por lpc y mylpc
+err_a = immse(a,a2);
+err_e = immse(e,e2);
+err_i = immse(i,i2);
+err_o = immse(o,o2);
+err_u = immse(u,u2);
+%%
+
+w=-fs/2:fs/2-1;
+b = 1;
+y_a2 = filter(b,a2,X);
+Ya2 = fft(y_a2);
+figure()
+plot(w,mag2db(abs(fftshift(Ya2))));
+xlim([0 fs/2])
+grid
+xlabel('Frecuencia Hz')
+ylabel('Magnitud dB')
+title('Magnitud del espectro de la señal sintetizada para la vocal "a"')
+
+audiowrite("mylpc_vowel_a.wav",y_a2,fs)
+%sound(y_a,fs)
+%pause(2);
+
+y_e2 = filter(b,e2,X);
+Ye2 = fft(y_e2);
+figure()
+plot(w,mag2db(abs(fftshift(Ye2))));
+xlim([0 fs/2])
+grid
+xlabel('Frecuencia Hz')
+ylabel('Magnitud dB')
+title('Magnitud del espectro de la señal sintetizada para la vocal "e"')
+
+audiowrite("mylpc_vowel_e.wav",y_e2,fs)
+%sound(y_e,fs)
+%pause(2);
+
+y_i2 = filter(b,i2,X);
+Yi2 = fft(y_i2);
+figure()
+plot(w,mag2db(abs(fftshift(Yi2))));
+xlim([0 fs/2])
+grid
+xlabel('Frecuencia Hz')
+ylabel('Magnitud dB')
+title('Magnitud del espectro de la señal sintetizada para la vocal "i"')
+
+audiowrite("mylpc_vowel_i.wav",y_i2,fs)
+%sound(y_i,fs)
+%pause(2);
+
+y_o2 = filter(b,o2,X);
+Yo2 = fft(y_o2);
+figure()
+plot(w,mag2db(abs(fftshift(Yo2))));
+xlim([0 fs/2])
+grid
+xlabel('Frecuencia Hz')
+ylabel('Magnitud dB')
+title('Magnitud del espectro de la señal sintetizada para la vocal "o"')
+
+audiowrite("mylpc_vowel_o.wav",y_o2,fs)
+%sound(y_o,fs)
+%pause(2);
+
+y_u2 = filter(b,u2,X);
+Yu2 = fft(y_u2);
+figure()
+plot(w,mag2db(abs(fftshift(Yu2))));
+xlim([0 fs/2])
+grid
+xlabel('Frecuencia Hz')
+ylabel('Magnitud dB')
+title('Magnitud del espectro de la señal sintetizada para la vocal "u"')
+
+audiowrite("mylpc_vowel_u.wav",y_u2,fs)
+%sound(y_u,fs)
+%pause(2);
 %% II.1) Segmento VUS 
 load("test_training_signals.mat");
 
@@ -243,7 +379,9 @@ plot(t(V4),x2(V4),'magenta')
 plot(t(V5),x2(V5),'magenta')
 plot(t(V6),x2(V6),'magenta')
 plot(t(V7),x2(V7),'magenta')
-
+title ('Señal temporal con clasificación de segmentos S,U o V')
+xlabel ('tiempos s')
+ylabel('amplitud')
 grid on 
 hold off 
 %% Calculo de Vrms y Zero crossing count
@@ -320,14 +458,17 @@ scatter(U10rms,zcU10,'blue')
 scatter(S1rms,zcS1,'black')
 scatter(S2rms,zcS2,'black')
 scatter(S3rms,zcS3,'black')
+title ('Diagrama de nube de puntos Cruces-por-cero v/s Valor RMS para segmentos S, U o V')
+xlabel('Valor RMS')
+ylabel('Cruces por cero')
 %%
 % umbral rms SILENCIO
 s_th = 0.036;
 
-% umbral rms U/V 
+% umbral rms U/V y de cruces por cero
 uv_th = 0.050; uv_vzc = 180;
 
-% umbral rms V 
+% umbral rms Vibración de cuerdas vocales (V) 
 v_th = 0.07;
 %% II.2) 
 
@@ -346,21 +487,30 @@ for k = 1:length(frame_idx)
         VUS(k) = 0;
     elseif (rms_v>s_th && rms_v<uv_th)
         VUS(k) = -1;
-    elseif (rms_v > 0.02 && rms_v < uv_th && zc_v <200)  % Zona de incerteza U/V. 
+    elseif (rms_v > uv_th && rms_v < v_th && zc_v < uv_vzc)  % Zona de incerteza U/V. 
         VUS(k) = -1;
-    elseif (rms_v > 0.03 && zc_v > 200)
+    elseif (rms_v > uv_th && rms_v < v_th && zc_v > uv_vzc)
         VUS(k) = 1;
-    else                            % Umbral rms para determinar vocales V.
+    elseif rms_v > v_th    % Umbral rms para determinar vocales V.
         VUS(k) = 1;
     end
 end
 figure()
 subplot(3,1,1)
 plot(x1)
+title('Señal temporal de prueba')
+xlabel('muestra n')
+ylabel('Amplitud')
 subplot(3,1,2)
 stairs(VUS)
+title('Variable VUS en función del frame n de 20 muestras')
+xlabel('frame n')
+ylabel('VUS (1,-1,0)')
+ylim([-1.1,1.1])
 subplot(3,1,3)
 plot(RMS)
+xlabel('frame n')
+ylabel('valor RMS')
 
 %% III)
 
@@ -388,17 +538,17 @@ for k = frame_idx
         VUS(k) = 0;
     elseif (rms_v>s_th && rms_v<uv_th)
         VUS(k) = -1;
-    elseif (rms_v < uv_th && zc_v <200)  % Zona de incerteza U/V. 
+    elseif (rms_v > uv_th && rms_v < v_th && zc_v < uv_vzc)  % Zona de incerteza U/V. 
         VUS(k) = -1;
-    elseif (rms_v > 0.044 && zc_v > 200)
+    elseif (rms_v > uv_th && rms_v < v_th && zc_v > uv_vzc)
         VUS(k) = 1;
-    else                            % Umbral rms para determinar vocales V.
+    elseif rms_v > v_th    % Umbral rms para determinar vocales V.
         VUS(k) = 1;
     end
 end
 figure()
 subplot(3,1,1)
-plot(x1)
+plot(x)
 subplot(3,1,2)
 stairs(VUS)
 subplot(3,1,3)
